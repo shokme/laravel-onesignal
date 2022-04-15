@@ -1,0 +1,41 @@
+{
+    "name": "shokme/laravel-onesignal",
+    "description": "Laravel OneSignal Notification",
+    "keywords": ["laravel", "onesignal"],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jordan Massart",
+            "email": "hello@jordan-massart.be"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "guzzlehttp/guzzle": "^7.4"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^7.3",
+        "phpunit/phpunit": "^9.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Shokme\\OneSignal\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Shokme\\OneSignal\\Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Shokme\\OneSignal\\OneSignalServiceProvider"
+            ],
+            "aliases": {
+                "OneSignal": "Shokme\\OneSignal\\Facades\\OneSignal"
+            }
+        }
+    }
+}
