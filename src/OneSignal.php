@@ -17,13 +17,14 @@ class OneSignal
 
     const ENDPOINT_NOTIFICATIONS = '/notifications';
 
+    /**
+     * @var array<Channel>|Channel
+     */
     protected array|Channel $channels = Channel::All;
 
     protected PendingRequest $http;
 
     protected array $body;
-
-    private array $segments = ['All'];
 
     private array $additionalParameters = [];
 
@@ -37,22 +38,39 @@ class OneSignal
             ->retry(config('onesignal.http.retry'));
     }
 
-    public function title(array $headings): self
+    public function make(): self
     {
-        $this->body['headings'] = $headings;
+        return $this;
+    }
+
+    public function subject(string|array $subject): self
+    {
+        if (is_string($subject)) {
+            $subject =  [config('app.locale') => $subject];
+        }
+
+        $this->body['headings'] = $subject;
 
         return $this;
     }
 
-    public function subtitle(array $subtitle): self
+    public function subtitle(string|array $subtitle): self
     {
+        if (is_string($subtitle)) {
+            $subtitle =  [config('app.locale') => $subtitle];
+        }
+
         $this->body['subtitle'] = $subtitle;
 
         return $this;
     }
 
-    public function contents(array $contents): self
+    public function contents(string|array $contents): self
     {
+        if (is_string($contents)) {
+            $contents =  [config('app.locale') => $contents];
+        }
+
         $this->body['contents'] = $contents;
 
         return $this;
@@ -86,18 +104,17 @@ class OneSignal
         return $this;
     }
 
-    public function segments(array $segments): self
-    {
-        $this->segments = $segments;
-
-        return $this;
-    }
-
     /**
      * @param  array<Channel>  $channels
      */
     public function channels(array $channels): self
     {
+        foreach ($channels as $channel) {
+            if (! in_array($channel, Channel::cases())) {
+                throw new \InvalidArgumentException("Invalid channel[$channel] must be an enum of ".Channel::class);
+            }
+        }
+
         $this->channels = $channels;
 
         return $this;
@@ -127,7 +144,7 @@ class OneSignal
         $this->body['filters'][] = [
             'field' => $field,
             'key' => $key,
-            'operator' => $operator,
+            'relation' => $operator,
             'value' => $value,
         ];
 
@@ -143,8 +160,6 @@ class OneSignal
 
     public function sendTo(SignalType $type, array $data = []): Response
     {
-        $this->body['included_segments'] = $this->segments;
-
         if ($type === SignalType::Users) {
             $this->body['include_external_user_ids'] = $this->toStringArray($data);
             $this->body['channel_for_external_user_ids'] = $this->channels;
