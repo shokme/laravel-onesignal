@@ -3,6 +3,7 @@
 namespace Shokme\OneSignal\Tests\Unit;
 
 use Carbon\Carbon;
+use Shokme\OneSignal\Enums\ButtonType;
 use Shokme\OneSignal\Enums\Channel;
 use Shokme\OneSignal\Enums\Delay;
 use Shokme\OneSignal\Facades\OneSignal;
@@ -50,6 +51,25 @@ class OneSignalTest extends TestCase
         $this->assertEquals('https://app.com', $data->body['url']);
     }
 
+    /** @test */
+    public function it_can_set_a_mobile_button()
+    {
+        $data = OneSignal::buttons(ButtonType::Mobile, [
+            ['id' => 'action-1', 'text' => 'Action To Trigger']
+        ]);
+
+        $this->assertEquals([['id' => 'action-1', 'text' => 'Action To Trigger']], $data->body['buttons']);
+    }
+
+    /** @test */
+    public function it_can_set_a_web_button()
+    {
+        $data = OneSignal::buttons(ButtonType::Web, [
+            ['id' => 'action-1', 'text' => 'Action To Trigger', 'url' => 'https://app.com']
+        ]);
+
+        $this->assertEquals([['id' => 'action-1', 'text' => 'Action To Trigger', 'url' => 'https://app.com']], $data->body['web_buttons']);
+    }
 
     /** @test */
     public function it_can_be_scheduled()

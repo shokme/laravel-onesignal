@@ -7,8 +7,11 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
+use Shokme\OneSignal\Enums\ButtonType;
 use Shokme\OneSignal\Enums\Channel;
 use Shokme\OneSignal\Enums\Delay;
+use Shokme\OneSignal\Enums\DeviceType;
+use Shokme\OneSignal\Enums\Kind;
 use Shokme\OneSignal\Enums\SignalType;
 
 class OneSignal
@@ -16,6 +19,8 @@ class OneSignal
     const API_URL = 'https://onesignal.com/api/v1';
 
     const ENDPOINT_NOTIFICATIONS = '/notifications';
+
+    const ENDPOINT_PLAYERS = '/players';
 
     /**
      * @var array<Channel>|Channel
@@ -79,6 +84,13 @@ class OneSignal
     public function url(string $url): self
     {
         $this->body['url'] = $url;
+
+        return $this;
+    }
+
+    public function buttons(ButtonType $type, array $buttons): self
+    {
+        $this->body[$type->value] = $buttons;
 
         return $this;
     }
@@ -168,12 +180,59 @@ class OneSignal
         } elseif ($type === SignalType::Segments) {
             $this->body['included_segments'] = $data;
         } elseif ($type === SignalType::Filters) {
-            $this->body['filters'] = $data;
+            $this->body['filters'] = [...$this->body['filters'], ...$data];
         }
 
         $body = [...$this->body, ...$this->additionalParameters];
 
         return $this->http->post(self::ENDPOINT_NOTIFICATIONS, $body);
+    }
+
+    public function getNotifications(Kind $kind = null, int $limit = 50, int $offset = 0): Response
+    {
+        return $this->http->get(self::ENDPOINT_NOTIFICATIONS, [
+            'app_id' => $this->appId,
+            'limit' => $limit,
+            'offset' => $offset,
+            'kind' => $kind->value,
+        ]);
+    }
+
+    public function getNotification(string $id, array $outcomes = []): Response
+    {
+        return $this->http->get(self::ENDPOINT_NOTIFICATIONS."/$id", ['app_id' => $this->appId, ...$outcomes]);
+    }
+
+    public function cancel(string $id): Response
+    {
+        return $this->http->delete(self::ENDPOINT_NOTIFICATIONS."/$id", ['app_id' => $this->appId]);
+    }
+
+    /**
+     * @param string $timezone one of {@link https://www.php.net/manual/en/timezones.php Timezones}
+     */
+    public function addPlayer(DeviceType $device, string $playerId = null, string $timezone = null, array $data = []): Response
+    {
+        $body = [
+            'device_type' => $device,
+            'identifier' => $playerId,
+            'timezone' => now($timezone)->getOffset(),
+        ];
+
+        return $this->http->post(self::ENDPOINT_PLAYERS, array_filter([...$this->body, ...$body, ...$data]));
+    }
+
+    /**
+     * @param string $timezone one of {@link https://www.php.net/manual/en/timezones.php Timezones}
+     */
+    public function editPlayer(string $id, string $playerId = null, string $timezone = null, array $data = []): Response
+    {
+        $body = [
+            'identifier' => $playerId,
+            'timezone' => now($timezone)->getOffset(),
+        ];
+
+        return $this->http->put(self::ENDPOINT_PLAYERS."/$id", array_filter([...$this->body, ...$body, ...$data]));
     }
 
     private function toStringArray(array|Collection $userIds): array
@@ -184,9 +243,4 @@ class OneSignal
 
         return $userIds->map(fn ($id) => (string) $id)->toArray();
     }
-
-    // TODO: buttons
-    // TODO: delete scheduled notifications
-    // TODO: get notifications
-    // TODO: get notification by id
 }
