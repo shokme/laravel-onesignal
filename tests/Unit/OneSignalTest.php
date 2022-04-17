@@ -119,12 +119,14 @@ class OneSignalTest extends TestCase
     /** @test */
     public function it_can_set_filter()
     {
-        OneSignal::filter('tag', 'test', 'test');
-        $data = OneSignal::filter('tag', 'test2', '<=', 'test2');
+        $data = OneSignal::filter('tag', 'test', 'test')
+            ->filter('amount_spent', '>', '10')
+            ->filter('session_count', 5);
 
         $this->assertEquals([
             ['field' => 'tag', 'key' => 'test', 'relation' => '=', 'value' => 'test'],
-            ['field' => 'tag', 'key' => 'test2', 'relation' => '<=', 'value' => 'test2'],
+            ['field' => 'amount_spent', 'relation' => '>', 'value' => '10'],
+            ['field' => 'session_count', 'relation' => '=', 'value' => '5'],
         ], $data->body['filters']);
     }
 

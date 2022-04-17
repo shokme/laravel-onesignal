@@ -4,7 +4,6 @@ namespace Shokme\OneSignal\Tests\Feature;
 
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
-use Ramsey\Uuid\Uuid;
 use Shokme\OneSignal\Enums\Channel;
 use Shokme\OneSignal\Enums\DeviceType;
 use Shokme\OneSignal\Enums\Kind;

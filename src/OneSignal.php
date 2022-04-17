@@ -25,7 +25,7 @@ class OneSignal
     /**
      * @var array<Channel>|Channel
      */
-    protected array|Channel $channels = Channel::All;
+    protected array|Channel $channels = Channel::Push;
 
     protected PendingRequest $http;
 
@@ -141,24 +141,42 @@ class OneSignal
 
     public function filters($filters): self
     {
-        $this->body['filters'] = $filters;
+        $this->body['filters'] = [...$this->body['filters'], ...$filters];
 
         return $this;
     }
 
-    public function filter(string $field, string $key, string $operator = null, string $value = null): self
+    /**
+     * @todo full filters support.
+     */
+    public function filter(string $field, string $key = null, string $operator = null, string $value = null): self
     {
-        if (func_num_args() === 3) {
+        if ($field !== 'tag') {
+            if (func_num_args() === 2) {
+                $value = $key;
+                $operator = '=';
+            }
+
+            if(func_num_args() === 3) {
+                $value = $operator;
+                $operator = $key;
+            }
+        } else if (func_num_args() === 3) {
             $value = $operator;
             $operator = '=';
         }
 
-        $this->body['filters'][] = [
+        $data = [
             'field' => $field,
-            'key' => $key,
             'relation' => $operator,
             'value' => $value,
         ];
+
+        if ($field === 'tag') {
+            $data['key'] = $key;
+        }
+
+        $this->body['filters'][] = $data;
 
         return $this;
     }
@@ -176,7 +194,7 @@ class OneSignal
             $this->body['include_external_user_ids'] = $this->toStringArray($data);
             $this->body['channel_for_external_user_ids'] = $this->channels;
         } elseif ($type === SignalType::Players) {
-            $this->body['include_player_ids'] = $this->toStringArray($data);
+            $this->body['include_player_ids'] =$data;
         } elseif ($type === SignalType::Segments) {
             $this->body['included_segments'] = $data;
         } elseif ($type === SignalType::Filters) {
