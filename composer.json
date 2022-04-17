@@ -1,7 +1,7 @@
 {
     "name": "shokme/laravel-onesignal",
     "description": "Laravel OneSignal Notification",
-    "keywords": ["laravel", "onesignal"],
+    "keywords": ["onesignal", "push", "notification", "webpush", "laravel"],
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -37,5 +37,7 @@
                 "OneSignal": "Shokme\\OneSignal\\Facades\\OneSignal"
             }
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
