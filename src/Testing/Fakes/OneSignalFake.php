@@ -1,11 +1,12 @@
 <?php
 
-namespace Shokme\OneSignal\Tests;
+namespace Shokme\OneSignal\Testing\Fakes;
 
 use Illuminate\Support\Facades\Http;
 use Shokme\OneSignal\Enums\Channel;
+use Shokme\OneSignal\OneSignal;
 
-class OneSignalFake extends \Shokme\OneSignal\OneSignal
+class OneSignalFake extends OneSignal
 {
     public array $body = [];
 

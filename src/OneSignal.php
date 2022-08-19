@@ -33,7 +33,7 @@ class OneSignal
 
     private array $additionalParameters = [];
 
-    public function __construct(protected string $appId, protected string $restApiKey)
+    public function __construct(protected ?string $appId, protected ?string $restApiKey)
     {
         $this->body['app_id'] = $appId;
         $this->http = Http::acceptJson()

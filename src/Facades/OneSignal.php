@@ -3,7 +3,7 @@
 namespace Shokme\OneSignal\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Shokme\OneSignal\Tests\OneSignalFake;
+use Shokme\OneSignal\Testing\Fakes\OneSignalFake;
 
 class OneSignal extends Facade
 {
